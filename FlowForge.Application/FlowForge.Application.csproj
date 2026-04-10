@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="WorkflowEngine\Actions\" />
+    <Folder Include="WorkflowEngine\Models\" />
+    <Folder Include="Workflows\" />
+    <Folder Include="WorkflowExecutions\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FlowForge.Domain\FlowForge.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

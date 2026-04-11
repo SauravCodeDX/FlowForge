@@ -1,25 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace FlowForge.Domain.Entities
 {
     //EmployeeCreated → Workflow executed
     public class WorkflowExecution
     {
-        public Guid Id { get; internal set; }
+        private WorkflowExecution() { } // Required by EF Core
 
-        public Guid WorkflowId { get; internal set; }
+        public Guid Id { get; private set; }
 
-        public DateTime StartedAt { get; internal set; }
+        public Guid WorkflowId { get; private set; }
 
-        public string Status { get; internal set; } = default!;
+        public DateTime StartedAt { get; private set; }
 
-        // Navigation property
-        public Workflow? Workflow { get; internal set; }
+        public string Status { get; private set; } = default!;
 
-        public ICollection<ActionExecution>? ActionExecutions { get; internal set; }
+        // Navigation properties
+        public Workflow? Workflow { get; private set; }
+
+        public ICollection<ActionExecution>? ActionExecutions { get; private set; }
+
+        public static WorkflowExecution Create(Guid workflowId)
+        {
+            return new WorkflowExecution
+            {
+                Id = Guid.NewGuid(),
+                WorkflowId = workflowId,
+                StartedAt = DateTime.UtcNow,
+                Status = "Running"
+            };
+        }
+
+        public void MarkCompleted() => Status = "Success";
+        public void MarkFailed() => Status = "Failed";
     }
 }

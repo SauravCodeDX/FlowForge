@@ -9,14 +9,26 @@ namespace FlowForge.Domain.Entities
     //Example - "New Employee Onboarding Workflow"
     public class Workflow
     {
-        public Guid Id { get; internal set; }
+        private Workflow() { } // Required by EF Core
 
-        public string Name { get; internal set; } = default!;
+        public Guid Id { get; private set; }
 
-        public bool IsActive { get; internal set; }
+        public string Name { get; private set; } = default!;
 
-        public ICollection<WorkflowTrigger>? Triggers { get; internal set; }
+        public bool IsActive { get; private set; }
 
-        public ICollection<WorkflowStep>? Steps { get; internal set; }
+        public ICollection<WorkflowTrigger>? Triggers { get; private set; }
+
+        public ICollection<WorkflowStep>? Steps { get; private set; }
+
+        public static Workflow Create(string name)
+        {
+            return new Workflow
+            {
+                Id = Guid.NewGuid(),
+                Name = name,
+                IsActive = true
+            };
+        }
     }
 }

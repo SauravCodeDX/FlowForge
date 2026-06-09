@@ -8,7 +8,7 @@ namespace FlowForge.Application.WorkflowEngine.Executors
 {
     public interface IWorkflowExecutor
     {
-        Task ExecuteAsync(
+        Task<WorkflowExecutionResult> ExecuteAsync(
             string eventName,
             string sourceSystem,
             string payload);

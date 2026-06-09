@@ -55,7 +55,8 @@ artifacts/
 # **/Migrations/
 
 # App secrets / config overrides
-appsettings.Development.json
+# appsettings.{Env}.json files are committed (no secrets inside)
+# Only appsettings.Local.json is gitignored — it holds secrets for local dev
 appsettings.Local.json
 secrets.json
 

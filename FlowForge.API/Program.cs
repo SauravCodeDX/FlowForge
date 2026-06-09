@@ -10,6 +10,11 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ── Local secrets override (gitignored — never committed) ────────────────────
+// Loads appsettings.Local.json if present (local dev secrets like API keys).
+// In Staging/Production, secrets come from environment variables or Key Vault.
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
 // ── Database ────────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<FlowForgeDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

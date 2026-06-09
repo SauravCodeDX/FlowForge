@@ -1,4 +1,5 @@
 using FlowForge.Application.WorkflowEngine.Actions;
+using FlowForge.Persistence.Seeding;
 using FlowForge.Application.WorkflowEngine.Executors;
 using FlowForge.Application.WorkflowEngine.Steps;
 using FlowForge.Application.WorkflowEngine.Triggers;
@@ -45,6 +46,23 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+// ── Startup: migrate DB + seed data ─────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<FlowForgeDbContext>();
+    var startupLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    startupLogger.LogInformation("[FlowForge] Database migration started...");
+    await db.Database.MigrateAsync();
+    startupLogger.LogInformation("[FlowForge] Database migration finished successfully.");
+
+    var seeder = new DataSeeder(
+        db,
+        scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>());
+    await seeder.SeedAsync();
+    startupLogger.LogInformation("[FlowForge] Startup complete. FlowForge is ready.");
 }
 
 app.UseHttpsRedirection();

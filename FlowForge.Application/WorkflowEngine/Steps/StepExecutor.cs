@@ -42,8 +42,7 @@ namespace FlowForge.Application.WorkflowEngine.Steps
                 if (!_handlers.TryGetValue(actionType, out var handler))
                 {
                     throw new InvalidOperationException(
-                        $"No handler registered for ActionType '{actionType}'. " +
-                        $"Registered types: {string.Join(", ", _handlers.Keys)}");
+                        $"No action handler registered for ActionType '{actionType}'. Check that the handler is registered in DI.");
                 }
 
                 await handler.ExecuteAsync(step.ConfigurationJson, context);
@@ -60,7 +59,8 @@ namespace FlowForge.Application.WorkflowEngine.Steps
                     "[FlowForge] Step Order={Order} ActionType={ActionType} | Failed",
                     step.Order, actionType);
 
-                throw; // Bubble up so WorkflowExecutor can mark the execution failed
+                throw new InvalidOperationException(
+                    $"Step {step.Order} (ActionType='{actionType}') failed: {ex.Message}", ex);
             }
             finally
             {

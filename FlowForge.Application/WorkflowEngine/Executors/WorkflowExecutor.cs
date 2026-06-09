@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 
 namespace FlowForge.Application.WorkflowEngine.Executors
 {
+    public record WorkflowExecutionResult(bool Success, string Message, int WorkflowsTriggered);
+
     public class WorkflowExecutor : IWorkflowExecutor
     {
         private readonly ITriggerResolver _triggerResolver;
@@ -33,7 +35,7 @@ namespace FlowForge.Application.WorkflowEngine.Executors
         /// 2. For each workflow, creates a WorkflowExecution record.
         /// 3. Runs steps sequentially; marks execution completed or failed.
         /// </summary>
-        public async Task ExecuteAsync(string eventName, string sourceSystem, string payload)
+        public async Task<WorkflowExecutionResult> ExecuteAsync(string eventName, string sourceSystem, string payload)
         {
             _logger.LogInformation(
                 "[FlowForge] Event received: {EventName} from {SourceSystem}",
@@ -46,13 +48,21 @@ namespace FlowForge.Application.WorkflowEngine.Executors
                 _logger.LogWarning(
                     "[FlowForge] No active workflows found for event={EventName} source={SourceSystem}",
                     eventName, sourceSystem);
-                return;
+                return new WorkflowExecutionResult(
+                    Success: false,
+                    Message: $"No active workflows found for event '{eventName}' from source '{sourceSystem}'.",
+                    WorkflowsTriggered: 0);
             }
 
             foreach (var workflow in workflows)
             {
                 await RunWorkflowAsync(workflow, eventName, sourceSystem, payload);
             }
+
+            return new WorkflowExecutionResult(
+                Success: true,
+                Message: $"{workflows.Count} workflow(s) triggered successfully.",
+                WorkflowsTriggered: workflows.Count);
         }
 
         private async Task RunWorkflowAsync(

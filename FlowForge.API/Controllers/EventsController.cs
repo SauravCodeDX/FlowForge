@@ -35,6 +35,8 @@ namespace FlowForge.API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status202Accepted)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> TriggerEvent([FromBody] TriggerEventRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.EventName))
@@ -53,13 +55,30 @@ namespace FlowForge.API.Controllers
                 request.EventName, request.SourceSystem);
 
             // Phase 1: execute synchronously (Worker service will make this async later)
-            await _workflowExecutor.ExecuteAsync(request.EventName, request.SourceSystem, payloadJson);
+            WorkflowExecutionResult result;
+            try
+            {
+                result = await _workflowExecutor.ExecuteAsync(request.EventName, request.SourceSystem, payloadJson);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception while processing event {EventName}", request.EventName);
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    error = "An error occurred while processing the event.",
+                    detail = ex.Message
+                });
+            }
+
+            if (!result.Success)
+                return NotFound(new { error = result.Message });
 
             return Accepted(new
             {
-                message = "Event received and processed.",
+                message = result.Message,
                 eventName = request.EventName,
-                sourceSystem = request.SourceSystem
+                sourceSystem = request.SourceSystem,
+                workflowsTriggered = result.WorkflowsTriggered
             });
         }
     }
